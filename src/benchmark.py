@@ -8,6 +8,8 @@ import os
 import transcribe
 import metrics
 import time
+import collections
+import shutil
 
 def main():
 
@@ -17,10 +19,12 @@ def main():
 
     asr_systems = settings.get('general','asr_systems').split(',')
     data_folder = settings.get('general','data_folder')
+    speech_file_type = settings.get('general','speech_file_type')
 
     print('asr_systems: {0}'.format(asr_systems))
     print('data_folder: {0}'.format(data_folder))
     speech_filepaths = glob.glob(os.path.join(data_folder, '*.wav'))
+    speech_filepaths = glob.glob(os.path.join(data_folder, '*.mp3'))
 
     if settings.getboolean('general','transcribe'):
         # Transcribe
@@ -28,22 +32,46 @@ def main():
         for speech_file_number, speech_filepath in enumerate(speech_filepaths):
             #if not 'AOLLFPCWXJVA6_1369_SU_BARU.wav' in speech_filepath: continue
             #if speech_file_number >= 100: break
+
+            # Convert the speech file from MP3 to WAV if needed
+            if speech_file_type == 'mp3':
+                from pydub import AudioSegment
+                print('speech_filepath: {0}'.format(speech_filepath))
+                sound = AudioSegment.from_mp3(speech_filepath)
+                new_speech_filepath = speech_filepath[:-4]+'.wav'
+                sound.export(new_speech_filepath, format="wav")
+                speech_filepath = new_speech_filepath
+
+            # Transcribe the speech file
             for asr_system in asr_systems:
                 transcription = transcribe.transcribe(speech_filepath,asr_system,settings,save_transcription=True)
+
+            # If the speech file was converted from MP3 to WAV, remove the WAV file
+            if speech_file_type == 'mp3':
+                os.remove(new_speech_filepath)
+
             #time.sleep(5)   # Delay in seconds
 
     if settings.getboolean('general','evaluate_transcriptions'):
         # Evaluate transcriptions
+        all_texts = {}
         print('\n### Final evaluation of all the ASR engines based on their predicted jurisdictions')
+
         for asr_system in asr_systems:
+            all_texts[asr_system] = {}
+
             all_predicted_transcription_filepath = 'all_predicted_transcriptions_' + asr_system + '.txt'
-            all_gold_transcription_filepath = 'all_gold_transcriptions_' + asr_system + '.txt'
+            all_gold_transcription_filepath = 'all_gold_transcriptions.txt'
+            all_predicted_transcription_file = open(all_predicted_transcription_filepath, 'w')
+            all_gold_transcription_filepath = open(all_gold_transcription_filepath, 'w')
 
             number_of_tokens_in_gold = 0
-            number_of_edits = 0
+            edit_types = ['corrects', 'deletions', 'insertions', 'substitutions', 'changes']
+            number_of_edits = {}
+            for edit_type in edit_types:
+                number_of_edits[edit_type] = 0
+
             for speech_filepath in speech_filepaths:
-                #if 'AYFAOYFBISRF3_6850_NUMBER_ONE' in speech_filepath: break
-                if 'A1A84EAZZI6YE_19728_LIGHTEN_SOME_OF_THE_BURN' in speech_filepath: break
                 predicted_transcription_filepath_base = '.'.join(speech_filepath.split('.')[:-1]) + '_'  + asr_system
                 predicted_transcription_filepath_text = predicted_transcription_filepath_base  + '.txt'
                 predicted_transcription = open(predicted_transcription_filepath_text, 'r').read()
@@ -54,22 +82,30 @@ def main():
                 gold_transcription = metrics.format_text(gold_transcription, lower_case=True, remove_punctuation=True,write_numbers_in_letters=True)
                 predicted_transcription = metrics.format_text(predicted_transcription, lower_case=True, remove_punctuation=True,write_numbers_in_letters=True)
 
-                print('\npredicted_transcription\t: {0}'.format(predicted_transcription))
-                print('gold_transcription\t: {0}'.format(gold_transcription))
+                all_predicted_transcription_file.write('{0}\n'.format(predicted_transcription))
+                all_gold_transcription_filepath.write('{0}\n'.format(gold_transcription))
+                #print('\npredicted_transcription\t: {0}'.format(predicted_transcription))
+                #print('gold_transcription\t: {0}'.format(gold_transcription))
                 wer = metrics.wer(gold_transcription.split(' '), predicted_transcription.split(' '))
-                print('wer: {0}'.format(wer))
+                #print('wer: {0}'.format(wer))
                 #wer = metrics.wer('blue hydrangea bouquet', 'blue had range of okay')
                 #print('wer: {0}'.format(wer))
 
-                #if len(predicted_transcription) == 0: continue
+                if len(predicted_transcription) == 0: continue
 
                 number_of_tokens_in_gold += len(gold_transcription.split(' '))
-                number_of_edits += wer
+                for edit_type in edit_types:
+                    number_of_edits[edit_type] += wer[edit_type]
                 #if number_of_tokens_in_gold > 1000: break
 
-            wer = number_of_edits / number_of_tokens_in_gold
-            print('\nGlobal WER based on the all predicted transcriptions:')
-            print('{3}\twer: {0:.5f}% (number_of_edits = {1}; number_of_tokens_in_gold = {2})'.format(wer*100, number_of_edits, number_of_tokens_in_gold,asr_system))
+            all_predicted_transcription_file.close()
+            all_gold_transcription_filepath.close()
+
+            wer = number_of_edits['changes'] / number_of_tokens_in_gold
+            #print('\nGlobal WER based on the all predicted transcriptions:')
+            #print('{3}\twer: {0:.5f}% ({1}; number_of_tokens_in_gold = {2})'.format(wer*100, number_of_edits, number_of_tokens_in_gold,asr_system))
+            print('{5}\twer: {0:.5f}% \t(deletions: {1}\t; insertions: {2}\t; substitutions: {3}\t; number_of_tokens_in_gold = {4})'.
+                  format(wer*100, number_of_edits['deletions'], number_of_edits['insertions'], number_of_edits['substitutions'], number_of_tokens_in_gold,asr_system))
 
 if __name__ == "__main__":
     main()

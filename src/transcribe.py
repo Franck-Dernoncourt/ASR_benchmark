@@ -6,19 +6,11 @@ import time
 import json
 import os
 import sys
-
+import asr_speechmatics
 
 def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
-    #print(speech_filepath)
-    #sys.stdout.buffer.write(speech_filepath.encode('utf8'))
-    '''
-    print('speech_filepath: {0}'.format(speech_filepath))
-    s='asr_system: {1}\tspeech_filepath: {0}'.format(speech_filepath,asr_system)
-    print('asr_system: {1}\tspeech_filepath: {0}'.format(speech_filepath,asr_system))
-    #sys.stdout.buffer.write(TestText2)
 
-    #if 'A11BTJ8VWYCZFW_11187_TAKE_OUT_THE_LEDGE_ON_THE_BOTTOM_RIGHT_CORNER_OR_CROP_IT_SO' in speech_filepath: 1/0
-    '''
+    transcription_json = ''
     transcription_filepath_base = '.'.join(speech_filepath.split('.')[:-1]) + '_'  + asr_system
     transcription_filepath_text = transcription_filepath_base  + '.txt'
     transcription_filepath_json = transcription_filepath_base  + '.json'
@@ -32,15 +24,6 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
     with sr.AudioFile(speech_filepath) as source:
         audio = r.record(source)  # read the entire audio file
 
-    '''
-    # recognize speech using Sphinx
-    try:
-        print("Sphinx thinks you said " + r.recognize_sphinx(audio))
-    except sr.UnknownValueError:
-        print("Sphinx could not understand audio")
-    except sr.RequestError as e:
-        print("Sphinx error; {0}".format(e))
-    '''
     transcription = ''
     asr_could_not_be_reached = False
     asr_timestamp_started = time.time()
@@ -129,6 +112,19 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
             print("Could not request results from IBM Speech to Text service; {0}".format(e))
             asr_could_not_be_reached = True
 
+    elif asr_system == 'speechmatics':
+        # recognize speech using Speechmatics Speech Recognition
+        language = 'en-US'
+        speechmatics_id = settings.get('credentials','speechmatics_id')
+        speechmatics_token = settings.get('credentials','speechmatics_token')
+        print('speech_filepath: {0}'.format(speech_filepath))
+        transcription,transcription_json = asr_speechmatics.transcribe_speechmatics(speechmatics_id,speechmatics_token,speech_filepath,language)
+        try:
+            print('Speechmatics  thinks you said {0}'.format(transcription))
+        except:
+            print('Speechmatics encountered some issue')
+            asr_could_not_be_reached = True
+
     else: raise ValueError("Invalid asr_system. asr_system = {0}".format(asr_system))
 
     asr_timestamp_ended = time.time()
@@ -144,6 +140,7 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
     print('transcription: {0}'.format(transcription))
     results = {}
     results['transcription'] = transcription
+    results['transcription_json'] = transcription_json
     results['asr_time_elapsed'] = asr_time_elapsed
     results['asr_timestamp_ended'] = asr_timestamp_ended
     results['asr_timestamp_started'] = asr_timestamp_started
@@ -152,6 +149,3 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
     json.dump(results, open(transcription_filepath_json, 'w'), indent = 4, sort_keys=True)
 
     return transcription
-
-
-
