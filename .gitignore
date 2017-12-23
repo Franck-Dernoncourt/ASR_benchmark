@@ -1,0 +1,6 @@
+# Misc
+.pydevproject
+*.project
+data/*
+!data/example_dataset
+*__pycache__*
