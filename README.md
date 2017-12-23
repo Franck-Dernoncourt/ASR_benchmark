@@ -2,7 +2,7 @@
 
 # Speech Recognition Benchmark
 
-The Speech Recognition Benchmark is program that assesses and compares the performances of automated speech recognition (ASR) engines. It runs on Mac OS X, Microsoft Windows and Ubuntu. It currently supports the following ASR engines: Google, Google Cloud, Houndify, IBM Watson, Microsoft (a.k.a. Bing) and Wit.
+The Speech Recognition Benchmark is program that assesses and compares the performances of automated speech recognition (ASR) engines. It runs on Mac OS X, Microsoft Windows and Ubuntu. It currently supports the following ASR engines: Google, Google Cloud, Houndify, IBM Watson, Microsoft (a.k.a. Bing), Speechmatics and Wit.
 
 ## Installation
 
