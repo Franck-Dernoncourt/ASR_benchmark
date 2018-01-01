@@ -50,7 +50,7 @@ def main():
             if speech_file_type == 'mp3':
                 os.remove(new_speech_filepath)
 
-            #time.sleep(5)   # Delay in seconds
+            time.sleep(settings.getint('general','delay_in_seconds_between_transcriptions'))
 
     if settings.getboolean('general','evaluate_transcriptions'):
         # Evaluate transcriptions
