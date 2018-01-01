@@ -15,30 +15,37 @@ def main():
 
     # Load setting file
     settings = configparser.ConfigParser()
-    settings.read("settings.ini")
+    settings_filepath = 'settings.ini'
+    settings.read(settings_filepath)
 
     asr_systems = settings.get('general','asr_systems').split(',')
     data_folder = settings.get('general','data_folder')
     speech_file_type = settings.get('general','speech_file_type')
+    if speech_file_type not in ['flac', 'mp3', 'ogg', 'wav']:
+        raise ValueError('You have set speech_file_type to be "{0}" in {1}. This is invalid. speech_file_type should be flac, ogg, mp3, or wav.'.
+                         format(speech_file_type,settings_filepath))
 
     print('asr_systems: {0}'.format(asr_systems))
     print('data_folder: {0}'.format(data_folder))
-    speech_filepaths = glob.glob(os.path.join(data_folder, '*.wav'))
-    speech_filepaths = glob.glob(os.path.join(data_folder, '*.mp3'))
+    speech_filepaths = glob.glob(os.path.join(data_folder, '*.{0}'.format(speech_file_type)))
 
     if settings.getboolean('general','transcribe'):
+
+        # Make sure there are files to transcribe
+        if len(speech_filepaths) <= 0:
+            raise ValueError('There is no file with the extension "{0}"  in the folder "{1}"'.
+                             format(speech_file_type,data_folder))
+
         # Transcribe
         print('\n### Call the ASR engines to compute predicted transcriptions')
         for speech_file_number, speech_filepath in enumerate(speech_filepaths):
-            #if not 'AOLLFPCWXJVA6_1369_SU_BARU.wav' in speech_filepath: continue
-            #if speech_file_number >= 100: break
 
-            # Convert the speech file from MP3 to WAV if needed
-            if speech_file_type == 'mp3':
+            # Convert the speech file from FLAC/MP3/Ogg to WAV
+            if speech_file_type in ['flac', 'mp3', 'ogg']:
                 from pydub import AudioSegment
                 print('speech_filepath: {0}'.format(speech_filepath))
-                sound = AudioSegment.from_mp3(speech_filepath)
-                new_speech_filepath = speech_filepath[:-4]+'.wav'
+                sound = AudioSegment.from_file(speech_filepath, format=speech_file_type)
+                new_speech_filepath = speech_filepath[:-len(speech_file_type)-1]+'.wav'
                 sound.export(new_speech_filepath, format="wav")
                 speech_filepath = new_speech_filepath
 
@@ -46,8 +53,8 @@ def main():
             for asr_system in asr_systems:
                 transcription = transcribe.transcribe(speech_filepath,asr_system,settings,save_transcription=True)
 
-            # If the speech file was converted from MP3 to WAV, remove the WAV file
-            if speech_file_type == 'mp3':
+            # If the speech file was converted from FLAC/MP3/Ogg to WAV, remove the WAV file
+            if speech_file_type in ['flac', 'mp3', 'ogg']:
                 os.remove(new_speech_filepath)
 
             time.sleep(settings.getint('general','delay_in_seconds_between_transcriptions'))
