@@ -27,7 +27,7 @@ def main():
 
     print('asr_systems: {0}'.format(asr_systems))
     print('data_folder: {0}'.format(data_folder))
-    speech_filepaths = glob.glob(os.path.join(data_folder, '*.{0}'.format(speech_file_type)))
+    speech_filepaths = sorted(glob.glob(os.path.join(data_folder, '*.{0}'.format(speech_file_type))))
 
     if settings.getboolean('general','transcribe'):
 
@@ -48,6 +48,7 @@ def main():
                 new_speech_filepath = speech_filepath[:-len(speech_file_type)-1]+'.wav'
                 sound.export(new_speech_filepath, format="wav")
                 speech_filepath = new_speech_filepath
+
 
             # Transcribe the speech file
             for asr_system in asr_systems:
@@ -73,15 +74,26 @@ def main():
             all_gold_transcription_filepath = open(all_gold_transcription_filepath, 'w')
 
             number_of_tokens_in_gold = 0
+            number_of_empty_predicted_transcription_txt_files = 0
+            number_of_missing_predicted_transcription_txt_files = 0
             edit_types = ['corrects', 'deletions', 'insertions', 'substitutions', 'changes']
             number_of_edits = {}
+
             for edit_type in edit_types:
                 number_of_edits[edit_type] = 0
 
             for speech_filepath in speech_filepaths:
                 predicted_transcription_filepath_base = '.'.join(speech_filepath.split('.')[:-1]) + '_'  + asr_system
-                predicted_transcription_filepath_text = predicted_transcription_filepath_base  + '.txt'
-                predicted_transcription = open(predicted_transcription_filepath_text, 'r').read()
+                predicted_transcription_txt_filepath = predicted_transcription_filepath_base  + '.txt'
+
+                if not os.path.isfile(predicted_transcription_txt_filepath):
+                    number_of_missing_predicted_transcription_txt_files += 1
+                    predicted_transcription = ''
+                else:
+                    predicted_transcription = open(predicted_transcription_txt_filepath, 'r').read().strip()
+                    if len(predicted_transcription) == 0:
+                        print('predicted_transcription_txt_filepath {0} is empty'.format(predicted_transcription_txt_filepath))
+                        number_of_empty_predicted_transcription_txt_files += 1
 
                 gold_transcription_filepath_base = '.'.join(speech_filepath.split('.')[:-1]) + '_'  + 'gold'
                 gold_transcription_filepath_text = gold_transcription_filepath_base  + '.txt'
@@ -95,15 +107,12 @@ def main():
                 #print('gold_transcription\t: {0}'.format(gold_transcription))
                 wer = metrics.wer(gold_transcription.split(' '), predicted_transcription.split(' '))
                 #print('wer: {0}'.format(wer))
-                #wer = metrics.wer('blue hydrangea bouquet', 'blue had range of okay')
-                #print('wer: {0}'.format(wer))
 
                 if len(predicted_transcription) == 0: continue
 
                 number_of_tokens_in_gold += len(gold_transcription.split(' '))
                 for edit_type in edit_types:
                     number_of_edits[edit_type] += wer[edit_type]
-                #if number_of_tokens_in_gold > 1000: break
 
             all_predicted_transcription_file.close()
             all_gold_transcription_filepath.close()
@@ -113,6 +122,10 @@ def main():
             #print('{3}\twer: {0:.5f}% ({1}; number_of_tokens_in_gold = {2})'.format(wer*100, number_of_edits, number_of_tokens_in_gold,asr_system))
             print('{5}\twer: {0:.5f}% \t(deletions: {1}\t; insertions: {2}\t; substitutions: {3}\t; number_of_tokens_in_gold = {4})'.
                   format(wer*100, number_of_edits['deletions'], number_of_edits['insertions'], number_of_edits['substitutions'], number_of_tokens_in_gold,asr_system))
+            print('Number of speech files: {0}'.format(len(speech_filepaths)))
+            print('Number of missing predicted prescription files: {0}'.format(number_of_missing_predicted_transcription_txt_files))
+            print('Number of empty predicted prescription files: {0}'.format(number_of_empty_predicted_transcription_txt_files))
+
 
 if __name__ == "__main__":
     main()
