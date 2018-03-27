@@ -8,13 +8,13 @@ import os
 import sys
 import asr_speechmatics
 
+
 def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
 
     transcription_json = ''
     transcription_filepath_base = '.'.join(speech_filepath.split('.')[:-1]) + '_'  + asr_system
     transcription_filepath_text = transcription_filepath_base  + '.txt'
     transcription_filepath_json = transcription_filepath_base  + '.json'
-    #if settings.getboolean('general','overwrite_transcriptions'): print('true')
     if not settings.getboolean('general','overwrite_transcriptions') and os.path.isfile(transcription_filepath_text):
         #print('Skipped speech file {0} because the file {1} already exists.'.format(speech_filepath,transcription_filepath_text))
         print('Change the setting `overwrite_transcriptions` to True if you want to overwrite existing transcriptions')
@@ -33,7 +33,16 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
             # for testing purposes, we're just using the default API key
             # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
             # instead of `r.recognize_google(audio)`
-            transcription = r.recognize_google(audio)
+            response = r.recognize_google(audio,show_all=True)
+            transcription_json = response
+
+            if "results" not in response or len(response["results"]) == 0: raise sr.UnknownValueError()
+            transcript = ""
+            for result in response["results"]:
+                transcript += result["alternatives"][0]["transcript"].strip() + " "
+
+            transcription = transcript
+
             print("Google Speech Recognition thinks you said " + r.recognize_google(audio))
         except sr.UnknownValueError:
             print("Google Speech Recognition could not understand audio")
@@ -45,10 +54,16 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
         # recognize speech using Google Cloud Speech
         GOOGLE_CLOUD_SPEECH_CREDENTIALS_filepath = settings.get('credentials','google_cloud_speech_credentials_filepath')
         GOOGLE_CLOUD_SPEECH_CREDENTIALS = open(GOOGLE_CLOUD_SPEECH_CREDENTIALS_filepath, 'r').read()
-        #json.loads(credentials_json)
         try:
-            transcription = r.recognize_google_cloud(audio, credentials_json=GOOGLE_CLOUD_SPEECH_CREDENTIALS)
-            #print("Google Cloud Speech thinks you said " + r.recognize_google_cloud(audio, credentials_json=GOOGLE_CLOUD_SPEECH_CREDENTIALS))
+            response = r.recognize_google_cloud(audio, credentials_json=GOOGLE_CLOUD_SPEECH_CREDENTIALS, show_all=True)
+            transcription_json = response
+            if "results" not in response or len(response["results"]) == 0: raise sr.UnknownValueError()
+            transcript = ""
+            for result in response["results"]:
+                transcript += result["alternatives"][0]["transcript"].strip() + " "
+
+            transcription = transcript
+
         except sr.UnknownValueError:
             print("Google Cloud Speech could not understand audio")
         except sr.RequestError as e:
@@ -62,8 +77,12 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
         WIT_AI_KEY = settings.get('credentials','wit_ai_key')
         print("Calling the Wit.ai API")
         try:
-            transcription = r.recognize_wit(audio, key=WIT_AI_KEY)
-            #print("Wit.ai thinks you said " + r.recognize_wit(audio, key=WIT_AI_KEY))
+            response = r.recognize_wit(audio, key=WIT_AI_KEY, show_all=True)
+            transcription_json = response
+
+            if "_text" not in response or response["_text"] is None: raise sr.UnknownValueError()
+            transcription = response["_text"]
+
         except sr.UnknownValueError:
             print("Wit.ai could not understand audio")
         except sr.RequestError as e:
@@ -75,8 +94,12 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
         BING_KEY = settings.get('credentials','bing_key')
         print('Calling the Microsoft Bing Voice Recognition API')
         try:
-            transcription =  r.recognize_bing(audio, key=BING_KEY)
-            #print("Microsoft Bing Voice Recognition thinks you said " + r.recognize_bing(audio, key=BING_KEY))
+            response =  r.recognize_bing(audio, key=BING_KEY, show_all=True)
+            transcription_json = response
+            if "RecognitionStatus" not in response or response["RecognitionStatus"] != "Success" or "DisplayText" not in response:
+                raise sr.UnknownValueError()
+            transcription = response["DisplayText"]
+
         except sr.UnknownValueError:
             print("Microsoft Bing Voice Recognition could not understand audio")
         except sr.RequestError as e:
@@ -91,8 +114,15 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
 
         print("Calling the Houndify API")
         try:
-            transcription = r.recognize_houndify(audio, client_id=HOUNDIFY_CLIENT_ID, client_key=HOUNDIFY_CLIENT_KEY)
-            #print("Houndify thinks you said " + r.recognize_houndify(audio, client_id=HOUNDIFY_CLIENT_ID, client_key=HOUNDIFY_CLIENT_KEY))
+            response = r.recognize_houndify(audio, client_id=HOUNDIFY_CLIENT_ID, client_key=HOUNDIFY_CLIENT_KEY, show_all=True)
+            transcription_json = response
+
+            if "Disambiguation" not in response or response["Disambiguation"] is None:
+                raise sr.UnknownValueError()
+
+            transcription = response['Disambiguation']['ChoiceData'][0]['Transcription']
+
+
         except sr.UnknownValueError:
             print("Houndify could not understand audio")
         except sr.RequestError as e:
@@ -104,8 +134,21 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
         IBM_USERNAME = settings.get('credentials','ibm_username')
         IBM_PASSWORD = settings.get('credentials','ibm_password')
         try:
-            transcription = r.recognize_ibm(audio, username=IBM_USERNAME, password=IBM_PASSWORD)
-            #print("IBM Speech to Text thinks you said " + r.recognize_ibm(audio, username=IBM_USERNAME, password=IBM_PASSWORD))
+            response = r.recognize_ibm(audio, username=IBM_USERNAME, password=IBM_PASSWORD, show_all=True)
+            transcription_json = response
+
+            if "results" not in response or len(response["results"]) < 1 or "alternatives" not in response["results"][0]:
+                raise sr.UnknownValueError()
+
+            transcription = []
+            for utterance in response["results"]:
+                if "alternatives" not in utterance: raise sr.UnknownValueError()
+                for hypothesis in utterance["alternatives"]:
+                    if "transcript" in hypothesis:
+                        transcription.append(hypothesis["transcript"])
+            transcription = "\n".join(transcription)
+            transcription = transcription.strip()
+
         except sr.UnknownValueError:
             print("IBM Speech to Text could not understand audio")
         except sr.RequestError as e:
