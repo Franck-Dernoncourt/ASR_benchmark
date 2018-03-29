@@ -51,14 +51,17 @@ def main():
 
 
             # Transcribe the speech file
+            all_transcription_skipped = True
             for asr_system in asr_systems:
-                transcription = transcribe.transcribe(speech_filepath,asr_system,settings,save_transcription=True)
+                transcription, transcription_skipped = transcribe.transcribe(speech_filepath,asr_system,settings,save_transcription=True)
+                all_transcription_skipped = all_transcription_skipped and transcription_skipped
 
             # If the speech file was converted from FLAC/MP3/Ogg to WAV, remove the WAV file
             if speech_file_type in ['flac', 'mp3', 'ogg']:
                 os.remove(new_speech_filepath)
 
-            time.sleep(settings.getint('general','delay_in_seconds_between_transcriptions'))
+            if not all_transcription_skipped:
+                time.sleep(settings.getint('general','delay_in_seconds_between_transcriptions'))
 
     if settings.getboolean('general','evaluate_transcriptions'):
         # Evaluate transcriptions

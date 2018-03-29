@@ -10,7 +10,11 @@ import asr_speechmatics
 
 
 def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
-
+    '''
+    Returns:
+     - transcription: string corresponding the transcription obtained from the ASR API or existing transcription file.
+     - transcription_skipped: Boolean indicating if the speech file was sent to the ASR API.
+    '''
     transcription_json = ''
     transcription_filepath_base = '.'.join(speech_filepath.split('.')[:-1]) + '_'  + asr_system
     transcription_filepath_text = transcription_filepath_base  + '.txt'
@@ -18,7 +22,8 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
     if not settings.getboolean('general','overwrite_transcriptions') and os.path.isfile(transcription_filepath_text):
         #print('Skipped speech file {0} because the file {1} already exists.'.format(speech_filepath,transcription_filepath_text))
         print('Change the setting `overwrite_transcriptions` to True if you want to overwrite existing transcriptions')
-        return open(transcription_filepath_text, 'r').read()
+        transcription_skipped = True
+        return open(transcription_filepath_text, 'r').read(), transcription_skipped
     # use the audio file as the audio source
     r = sr.Recognizer()
     with sr.AudioFile(speech_filepath) as source:
@@ -191,4 +196,5 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
 
     json.dump(results, open(transcription_filepath_json, 'w'), indent = 4, sort_keys=True)
 
-    return transcription
+    transcription_skipped = False
+    return transcription, transcription_skipped
