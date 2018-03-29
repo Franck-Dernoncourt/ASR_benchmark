@@ -19,11 +19,22 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
     transcription_filepath_base = '.'.join(speech_filepath.split('.')[:-1]) + '_'  + asr_system
     transcription_filepath_text = transcription_filepath_base  + '.txt'
     transcription_filepath_json = transcription_filepath_base  + '.json'
-    if not settings.getboolean('general','overwrite_transcriptions') and os.path.isfile(transcription_filepath_text):
-        #print('Skipped speech file {0} because the file {1} already exists.'.format(speech_filepath,transcription_filepath_text))
-        print('Change the setting `overwrite_transcriptions` to True if you want to overwrite existing transcriptions')
-        transcription_skipped = True
-        return open(transcription_filepath_text, 'r').read(), transcription_skipped
+
+    # If there already exists a transcription file,  we may skip it depending on the user settings.
+    if os.path.isfile(transcription_filepath_text):
+        existing_transcription = open(transcription_filepath_text, 'r').read()
+        is_transcription_file_empty = len(existing_transcription.strip()) == 0
+        if not is_transcription_file_empty and not settings.getboolean('general','overwrite_non_empty_transcriptions'):
+            print('Skipped speech file {0} because the file {1} already exists and is not empty.'.format(speech_filepath,transcription_filepath_text))
+            print('Change the setting `overwrite_non_empty_transcriptions` to True if you want to overwrite existing transcriptions')
+            transcription_skipped = True
+            return existing_transcription, transcription_skipped
+        if is_transcription_file_empty and not settings.getboolean('general','overwrite_empty_transcriptions'):
+            print('Skipped speech file {0} because the file {1} already exists and is empty.'.format(speech_filepath,transcription_filepath_text))
+            print('Change the setting `overwrite_empty_transcriptions` to True if you want to overwrite existing transcriptions')
+            transcription_skipped = True
+            return existing_transcription, transcription_skipped
+
     # use the audio file as the audio source
     r = sr.Recognizer()
     with sr.AudioFile(speech_filepath) as source:
