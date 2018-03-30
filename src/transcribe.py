@@ -52,12 +52,17 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
             response = r.recognize_google(audio,show_all=True)
             transcription_json = response
 
-            if "results" not in response or len(response["results"]) == 0: raise sr.UnknownValueError()
-            transcript = ""
-            for result in response["results"]:
-                transcript += result["alternatives"][0]["transcript"].strip() + " "
+            actual_result = response
+            if not isinstance(actual_result, dict) or len(actual_result.get("alternative", [])) == 0: raise sr.UnknownValueError()
 
-            transcription = transcript
+            if "confidence" in actual_result["alternative"]:
+                # return alternative with highest confidence score
+                best_hypothesis = max(actual_result["alternative"], key=lambda alternative: alternative["confidence"])
+            else:
+                # when there is no confidence available, we arbitrarily choose the first hypothesis.
+                best_hypothesis = actual_result["alternative"][0]
+            if "transcript" not in best_hypothesis: raise sr.UnknownValueError()
+            transcription = best_hypothesis["transcript"]
 
             print("Google Speech Recognition thinks you said " + r.recognize_google(audio))
         except sr.UnknownValueError:
