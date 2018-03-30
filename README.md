@@ -14,4 +14,4 @@ The configuration file [`src/settings.ini`](src/settings.ini) contains all the p
 
 ## Usage
 
-Run `python benchmark.py`
+Run `cd src; python benchmark.py`
