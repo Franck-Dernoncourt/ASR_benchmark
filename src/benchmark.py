@@ -21,9 +21,28 @@ def main():
     asr_systems = settings.get('general','asr_systems').split(',')
     data_folder = settings.get('general','data_folder')
     speech_file_type = settings.get('general','speech_file_type')
-    if speech_file_type not in ['flac', 'mp3', 'ogg', 'wav']:
+    supported_speech_file_types = sorted(['flac', 'mp3', 'ogg', 'wav'])
+
+    # Automatically detect the speech file type.
+    # Heuristic: the detected speech file type is the one that has the more speech files in data_folder
+    #            e.g., if in data_folder there are 10 mp3s and 25 flacs, then choose flac
+    if speech_file_type == 'auto':
+        maximum_number_of_speech_files = 0
+        detected_speech_file_type = None
+        for supported_speech_file_type in supported_speech_file_types:
+            potential_speech_filepaths = sorted(glob.glob(os.path.join(data_folder, '*.{0}'.format(supported_speech_file_type))))
+            if maximum_number_of_speech_files < len(potential_speech_filepaths):
+                maximum_number_of_speech_files = len(potential_speech_filepaths)
+                detected_speech_file_type = supported_speech_file_type
+        speech_file_type = detected_speech_file_type
+        print('Detected speech file type: {0}'.format(speech_file_type))
+        if detected_speech_file_type is None:
+            raise ValueError('You have set speech_file_type to be "auto" in {1}. We couldn\'t detect any speech file. Speech file extensions should be {2}.'
+                             .format(speech_file_type, settings_filepath, supported_speech_file_types))
+
+    if speech_file_type not in supported_speech_file_types:
         raise ValueError('You have set speech_file_type to be "{0}" in {1}. This is invalid. speech_file_type should be flac, ogg, mp3, or wav.'.
-                         format(speech_file_type,settings_filepath))
+                         format(speech_file_type, settings_filepath))
 
     print('asr_systems: {0}'.format(asr_systems))
     print('data_folder: {0}'.format(data_folder))
@@ -39,7 +58,6 @@ def main():
         # Transcribe
         print('\n### Call the ASR engines to compute predicted transcriptions')
         for speech_file_number, speech_filepath in enumerate(speech_filepaths):
-
             # Convert the speech file from FLAC/MP3/Ogg to WAV
             if speech_file_type in ['flac', 'mp3', 'ogg']:
                 from pydub import AudioSegment
@@ -95,7 +113,7 @@ def main():
                 else:
                     predicted_transcription = open(predicted_transcription_txt_filepath, 'r').read().strip()
                     if len(predicted_transcription) == 0:
-                        print('predicted_transcription_txt_filepath {0} is empty'.format(predicted_transcription_txt_filepath))
+                        #print('predicted_transcription_txt_filepath {0} is empty'.format(predicted_transcription_txt_filepath))
                         number_of_empty_predicted_transcription_txt_files += 1
 
                 gold_transcription_filepath_base = '.'.join(speech_filepath.split('.')[:-1]) + '_'  + 'gold'
@@ -111,7 +129,7 @@ def main():
                 wer = metrics.wer(gold_transcription.split(' '), predicted_transcription.split(' '))
                 #print('wer: {0}'.format(wer))
 
-                if len(predicted_transcription) == 0: continue
+                #if len(predicted_transcription) == 0: continue
 
                 number_of_tokens_in_gold += len(gold_transcription.split(' '))
                 for edit_type in edit_types:
