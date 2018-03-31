@@ -51,7 +51,6 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
             # for testing purposes, we're just using the default API key
             # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
             # instead of `r.recognize_google(audio)`
-            print('speech_language: {0}'.format(speech_language))
             response = r.recognize_google(audio, show_all=True, language=speech_language)
             transcription_json = response
 
@@ -67,7 +66,7 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
             if "transcript" not in best_hypothesis: raise sr.UnknownValueError()
             transcription = best_hypothesis["transcript"]
 
-            print("Google Speech Recognition thinks you said " + r.recognize_google(audio))
+            print("Google Speech Recognition thinks you said " + transcription)
         except sr.UnknownValueError:
             print("Google Speech Recognition could not understand audio")
         except sr.RequestError as e:
