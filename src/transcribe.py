@@ -7,6 +7,7 @@ import json
 import os
 import sys
 import asr_speechmatics
+import codecs
 
 
 def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
@@ -22,7 +23,7 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
 
     # If there already exists a transcription file,  we may skip it depending on the user settings.
     if os.path.isfile(transcription_filepath_text):
-        existing_transcription = open(transcription_filepath_text, 'r').read()
+        existing_transcription = codecs.open(transcription_filepath_text, 'r', settings.get('general','predicted_transcription_encoding')).read()
         is_transcription_file_empty = len(existing_transcription.strip()) == 0
         if not is_transcription_file_empty and not settings.getboolean('general','overwrite_non_empty_transcriptions'):
             print('Skipped speech file {0} because the file {1} already exists and is not empty.'.format(speech_filepath,transcription_filepath_text))
@@ -76,7 +77,7 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
     elif asr_system == 'googlecloud':
         # recognize speech using Google Cloud Speech
         GOOGLE_CLOUD_SPEECH_CREDENTIALS_filepath = settings.get('credentials','google_cloud_speech_credentials_filepath')
-        GOOGLE_CLOUD_SPEECH_CREDENTIALS = open(GOOGLE_CLOUD_SPEECH_CREDENTIALS_filepath, 'r').read()
+        GOOGLE_CLOUD_SPEECH_CREDENTIALS = codecs.open(GOOGLE_CLOUD_SPEECH_CREDENTIALS_filepath, 'r', 'UTF-8').read()
         try:
             response = r.recognize_google_cloud(audio, credentials_json=GOOGLE_CLOUD_SPEECH_CREDENTIALS, show_all=True, language=speech_language)
             transcription_json = response
@@ -198,7 +199,7 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
 
     if save_transcription:
         #print('Transcription saved in {0} and {1}'.format(transcription_filepath_text,transcription_filepath_json))
-        open(transcription_filepath_text,'w').write(transcription)
+        codecs.open(transcription_filepath_text,'w', settings.get('general','predicted_transcription_encoding')).write(transcription)
 
     print('transcription: {0}'.format(transcription))
     results = {}
@@ -209,7 +210,7 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
     results['asr_timestamp_started'] = asr_timestamp_started
 
 
-    json.dump(results, open(transcription_filepath_json, 'w'), indent = 4, sort_keys=True)
+    json.dump(results, codecs.open(transcription_filepath_json, 'w', settings.get('general','predicted_transcription_encoding')), indent = 4, sort_keys=True)
 
     transcription_skipped = False
     return transcription, transcription_skipped

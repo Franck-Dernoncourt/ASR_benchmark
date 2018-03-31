@@ -10,6 +10,7 @@ import metrics
 import time
 import collections
 import shutil
+import codecs
 
 def main():
 
@@ -95,8 +96,8 @@ def main():
 
                 all_predicted_transcription_filepath = 'all_predicted_transcriptions_' + asr_system + '.txt'
                 all_gold_transcription_filepath = 'all_gold_transcriptions.txt'
-                all_predicted_transcription_file = open(all_predicted_transcription_filepath, 'w')
-                all_gold_transcription_filepath = open(all_gold_transcription_filepath, 'w')
+                all_predicted_transcription_file = codecs.open(all_predicted_transcription_filepath, 'w', settings.get('general','predicted_transcription_encoding'))
+                all_gold_transcription_filepath = codecs.open(all_gold_transcription_filepath, 'w', settings.get('general','gold_transcription_encoding'))
 
                 number_of_tokens_in_gold = 0
                 number_of_empty_predicted_transcription_txt_files = 0
@@ -115,14 +116,14 @@ def main():
                         number_of_missing_predicted_transcription_txt_files += 1
                         predicted_transcription = ''
                     else:
-                        predicted_transcription = open(predicted_transcription_txt_filepath, 'r').read().strip()
+                        predicted_transcription = codecs.open(predicted_transcription_txt_filepath, 'r', settings.get('general','predicted_transcription_encoding')).read().strip()
                         if len(predicted_transcription) == 0:
                             #print('predicted_transcription_txt_filepath {0} is empty'.format(predicted_transcription_txt_filepath))
                             number_of_empty_predicted_transcription_txt_files += 1
 
                     gold_transcription_filepath_base = '.'.join(speech_filepath.split('.')[:-1]) + '_'  + 'gold'
                     gold_transcription_filepath_text = gold_transcription_filepath_base  + '.txt'
-                    gold_transcription = open(gold_transcription_filepath_text, 'r').read()
+                    gold_transcription = codecs.open(gold_transcription_filepath_text, 'r', settings.get('general','gold_transcription_encoding')).read()
                     gold_transcription = metrics.format_text(gold_transcription, lower_case=True, remove_punctuation=True,write_numbers_in_letters=True)
                     predicted_transcription = metrics.format_text(predicted_transcription, lower_case=True, remove_punctuation=True,write_numbers_in_letters=True)
 
