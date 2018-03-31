@@ -43,13 +43,15 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
     transcription = ''
     asr_could_not_be_reached = False
     asr_timestamp_started = time.time()
+    speech_language = settings.get('general','speech_language')
     if asr_system == 'google':
         # recognize speech using Google Speech Recognition
         try:
             # for testing purposes, we're just using the default API key
             # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
             # instead of `r.recognize_google(audio)`
-            response = r.recognize_google(audio,show_all=True)
+            print('speech_language: {0}'.format(speech_language))
+            response = r.recognize_google(audio, show_all=True, language=speech_language)
             transcription_json = response
 
             actual_result = response
@@ -76,7 +78,7 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
         GOOGLE_CLOUD_SPEECH_CREDENTIALS_filepath = settings.get('credentials','google_cloud_speech_credentials_filepath')
         GOOGLE_CLOUD_SPEECH_CREDENTIALS = open(GOOGLE_CLOUD_SPEECH_CREDENTIALS_filepath, 'r').read()
         try:
-            response = r.recognize_google_cloud(audio, credentials_json=GOOGLE_CLOUD_SPEECH_CREDENTIALS, show_all=True)
+            response = r.recognize_google_cloud(audio, credentials_json=GOOGLE_CLOUD_SPEECH_CREDENTIALS, show_all=True, language=speech_language)
             transcription_json = response
             if "results" not in response or len(response["results"]) == 0: raise sr.UnknownValueError()
             transcript = ""
@@ -90,8 +92,6 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
         except sr.RequestError as e:
             print("Could not request results from Google Cloud Speech service; {0}".format(e))
             asr_could_not_be_reached = True
-
-
 
     # recognize speech using Wit.ai
     elif asr_system == 'wit':
@@ -115,7 +115,7 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
         BING_KEY = settings.get('credentials','bing_key')
         print('Calling the Microsoft Bing Voice Recognition API')
         try:
-            response =  r.recognize_bing(audio, key=BING_KEY, show_all=True)
+            response =  r.recognize_bing(audio, key=BING_KEY, show_all=True, language=speech_language)
             transcription_json = response
             if "RecognitionStatus" not in response or response["RecognitionStatus"] != "Success" or "DisplayText" not in response:
                 raise sr.UnknownValueError()
@@ -155,7 +155,7 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
         IBM_USERNAME = settings.get('credentials','ibm_username')
         IBM_PASSWORD = settings.get('credentials','ibm_password')
         try:
-            response = r.recognize_ibm(audio, username=IBM_USERNAME, password=IBM_PASSWORD, show_all=True)
+            response = r.recognize_ibm(audio, username=IBM_USERNAME, password=IBM_PASSWORD, show_all=True, language=speech_language)
             transcription_json = response
 
             if "results" not in response or len(response["results"]) < 1 or "alternatives" not in response["results"][0]:
@@ -178,11 +178,10 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
 
     elif asr_system == 'speechmatics':
         # recognize speech using Speechmatics Speech Recognition
-        language = 'en-US'
         speechmatics_id = settings.get('credentials','speechmatics_id')
         speechmatics_token = settings.get('credentials','speechmatics_token')
         print('speech_filepath: {0}'.format(speech_filepath))
-        transcription,transcription_json = asr_speechmatics.transcribe_speechmatics(speechmatics_id,speechmatics_token,speech_filepath,language)
+        transcription,transcription_json = asr_speechmatics.transcribe_speechmatics(speechmatics_id,speechmatics_token,speech_filepath,speech_language)
         try:
             print('Speechmatics  thinks you said {0}'.format(transcription))
         except:
