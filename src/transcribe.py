@@ -66,7 +66,7 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
             if "transcript" not in best_hypothesis: raise sr.UnknownValueError()
             transcription = best_hypothesis["transcript"]
 
-            print("Google Speech Recognition thinks you said " + transcription)
+            print("Google Speech Recognition transcription is: " + transcription)
         except sr.UnknownValueError:
             print("Google Speech Recognition could not understand audio")
         except sr.RequestError as e:
@@ -183,7 +183,7 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
         print('speech_filepath: {0}'.format(speech_filepath))
         transcription,transcription_json = asr_speechmatics.transcribe_speechmatics(speechmatics_id,speechmatics_token,speech_filepath,speech_language)
         try:
-            print('Speechmatics  thinks you said {0}'.format(transcription))
+            print('Speechmatics  transcription is: {0}'.format(transcription))
         except:
             print('Speechmatics encountered some issue')
             asr_could_not_be_reached = True
