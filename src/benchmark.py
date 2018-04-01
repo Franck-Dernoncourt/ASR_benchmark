@@ -124,8 +124,8 @@ def main():
                     gold_transcription_filepath_base = '.'.join(speech_filepath.split('.')[:-1]) + '_'  + 'gold'
                     gold_transcription_filepath_text = gold_transcription_filepath_base  + '.txt'
                     gold_transcription = codecs.open(gold_transcription_filepath_text, 'r', settings.get('general','gold_transcription_encoding')).read()
-                    gold_transcription = metrics.format_text(gold_transcription, lower_case=True, remove_punctuation=True,write_numbers_in_letters=True)
-                    predicted_transcription = metrics.format_text(predicted_transcription, lower_case=True, remove_punctuation=True,write_numbers_in_letters=True)
+                    gold_transcription = metrics.normalize_text(gold_transcription, lower_case=True, remove_punctuation=True,write_numbers_in_letters=True)
+                    predicted_transcription = metrics.normalize_text(predicted_transcription, lower_case=True, remove_punctuation=True,write_numbers_in_letters=True)
 
                     all_predicted_transcription_file.write('{0}\n'.format(predicted_transcription))
                     all_gold_transcription_filepath.write('{0}\n'.format(gold_transcription))

@@ -2,9 +2,9 @@ import numpy
 import string
 
 
-def format_text(text, lower_case=False, remove_punctuation=False,write_numbers_in_letters=True):
+def normalize_text(text, lower_case=False, remove_punctuation=False, write_numbers_in_letters=True):
     '''
-
+    Perform text normalization
     '''
     if lower_case: text = text.lower()
 
