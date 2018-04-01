@@ -34,3 +34,18 @@ Important note: CV, LS-c, and LS-o are public corpora so it is very much possibl
 | Wit.ai       | 2018-03-30 | 35.6 | 54.2| 37.4| 19.2| 41.7
 
 (* means only a subset of the corpus had been used to compute the word error rate)
+
+## Citation
+
+If you use this code in your publications, please cite:
+
+```
+@misc{ASRbenchmark2018,
+  author = {Franck Dernoncourt, Trung Bui, Walter Chang},
+  title = {A Framework for Speech Recognition Benchmarking},
+  year = {2018},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/Franck-Dernoncourt/ASR_benchmark}},
+}
+```
