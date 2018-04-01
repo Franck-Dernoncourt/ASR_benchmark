@@ -35,6 +35,14 @@ Important note: CV, LS-c, and LS-o are public corpora so it is very much possibl
 
 (* means only a subset of the corpus had been used to compute the word error rate)
 
+## License
+
+Some code snippets were taken from:
+- in [`src/transcribe.py`](src/transcribe.py), some code was adapted from https://github.com/Uberi/speech_recognition (made available under the 3-clause BSD license). For more licensing information. see the SpeechRecognition README.
+- in [`src/metrics.py`](src/metrics.py), the function to compute the word error rate mostly comes from [http://progfruits.blogspot.com/2014/02/word-error-rate-wer-and-word.html](https://web.archive.org/web/20171215025927/http://progfruits.blogspot.com/2014/02/word-error-rate-wer-and-word.html) (author: [SpacePineapple](https://web.archive.org/web/20180401185957/https://www.blogger.com/profile/12691129381793481173), no license specified) and https://martin-thoma.com/word-error-rate-calculation (author: [Martin Thoma](https://github.com/MartinThoma), no license specified).
+
+The rest of the code is made available under the [CC BY-NC 4.0 license](https://creativecommons.org/licenses/by-nc/4.0/).
+
 ## Citation
 
 If you use this code in your publications, please cite:
