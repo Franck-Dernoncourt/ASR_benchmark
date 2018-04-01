@@ -2,5 +2,5 @@
 .pydevproject
 *.project
 data/*
-!data/example_dataset
+!data/example_dataset_en
 *__pycache__*
