@@ -8,9 +8,7 @@ The Speech Recognition Benchmark is program that assesses and compares the perfo
 
 The Speech Recognition Benchmark requires Python 3, as well as a few Python packages that you may install running `pip install -r requirements.txt`
 
-The configuration file [`src/settings.ini`](src/settings.ini) contains all the parameters that you may wish to change. Some ASR APIs require credentials for the user to be able to query them.
-
-
+The configuration file [`src/settings.ini`](src/settings.ini) contains all the parameters that you may wish to change. 
 
 ## Usage
 
