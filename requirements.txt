@@ -1,4 +1,3 @@
-google-api-python-client
 numpy
 oauth2client
 SpeechRecognition
