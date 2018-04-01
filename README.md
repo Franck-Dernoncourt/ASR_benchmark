@@ -18,7 +18,7 @@ Run `cd src; python benchmark.py`
 
 ## Benchmark results
 
-Below are some benchmark results presenting the [word error rates](https://en.wikipedia.org/wiki/Word_error_rate) expressed in percentage for several ASR APIs on the following 5 corpora: CV = Common Voice (total length: 4:58:32, divided into 3995 speech files); F = Fotolia (4:28:05, 3184); IER = Image Edit Requests (2:29:09, 1289); LS-c = LibriSpeech clean (1:53:37, 870); LS-o = LibriSpeech other (5:20:29, 2939). These 5 corpora are all in English.
+Below are some benchmark results presenting the [word error rates](https://en.wikipedia.org/wiki/Word_error_rate) expressed in percentage for several ASR APIs on the following 5 corpora: CV = [Common Voice](https://voice.mozilla.org) (total length: 4:58:32, divided into 3995 speech files); F = Fotolia (4:28:05, 3184); IER = Image Edit Requests (2:29:09, 1289); LS-c = [LibriSpeech](http://www.openslr.org/12) clean (1:53:37, 870); LS-o = LibriSpeech other (5:20:29, 2939). These 5 corpora are all in English. For each of these corpora, we only use the official test set.
 
 Important note: CV, LS-c, and LS-o are public corpora so it is very much possible that some ASRs have been trained on it, making the word error rates lower then they should be. On the contrary, F and IER are private corpora. Also, different APIs may differ on how well they handle languages other than English, speaker accents, background noise, etc. Consequently, you may want to perform the benchmark on a corpus that reflects your use case (in which case you are very welcome to share your results here).
 
