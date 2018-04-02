@@ -1,0 +1,12 @@
+sudo: required
+dist: xenial
+os:
+    - linux
+language: python
+python: 
+  - "3.5"
+install:
+  - pip install -r requirements
+script:  
+  - cd src
+  - python3 benchmark.py
