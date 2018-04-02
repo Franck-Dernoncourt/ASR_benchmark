@@ -4,7 +4,20 @@
 
 [![Build Status](https://travis-ci.org/Franck-Dernoncourt/ASR_benchmark.svg?branch=master)](https://travis-ci.org/Franck-Dernoncourt/ASR_benchmark)
 
-The Speech Recognition Benchmark is program that assesses and compares the performances of automated speech recognition (ASR) APIs. It runs on Mac OS X, Microsoft Windows and Ubuntu. It currently supports the following ASR APIs: Google, Google Cloud, Houndify, IBM Watson, Microsoft (a.k.a. Bing), Speechmatics and Wit.
+The Speech Recognition Benchmark is a program that assesses and compares the performances of automated speech recognition (ASR) APIs. It runs on Mac OS X, Microsoft Windows and Ubuntu. It currently supports the following ASR APIs: Google, Google Cloud, Houndify, IBM Watson, Microsoft (a.k.a. Bing), Speechmatics and Wit.
+
+
+ ## Table of Contents
+
+<!-- toc -->
+
+* [Installation](#installation)
+* [Usage](#usage)
+* [Benchmark results](#benchmark-results)
+* [License](#license)
+* [Citation](#citation)
+
+<!-- tocstop -->
 
 ## Installation
 
