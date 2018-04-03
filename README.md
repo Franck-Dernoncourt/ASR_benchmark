@@ -14,6 +14,7 @@ The Speech Recognition Benchmark is a program that assesses and compares the per
 * [Installation](#installation)
 * [Usage](#usage)
 * [Benchmark results](#benchmark-results)
+* [Corpora](#corpora)
 * [License](#license)
 * [Citation](#citation)
 
@@ -47,6 +48,49 @@ Important note: CV, LS-c, and LS-o are public corpora so it is very much possibl
 | Wit.ai       | 2018-03-30 | 35.6 | 54.2| 37.4| 19.2| 41.7
 
 (* means only a subset of the corpus had been used to compute the word error rate)
+
+
+## Corpora
+
+For convenience, we provide two scripts to format the Common Voice and LibriSpeech corpora so that the ASR benchmark can be run on them.
+
+Bash script to format Common Voice (requires ~25 GB disk space):
+
+```
+# cv_corpus_v1.tar.gz is 12 GB
+wget https://common-voice-data-download.s3.amazonaws.com/cv_corpus_v1.tar.gz
+tar -xvf cv_corpus_v1.tar.gz
+mkdir cv-valid-test
+mv cv_corpus_v1/cv-valid-test cv-valid-test
+mv cv_corpus_v1/cv-valid-test.csv cv-valid-test
+rm -Rf  cv_corpus_v1
+rm cv_corpus_v1.tar.gz
+cd  ../src 
+# format_common_voice_gold_transcriptions.py requires the pandas package, which can be installed with: pip install pandas
+python format_common_voice_gold_transcriptions.py
+``` 
+
+Bash script to format LibriSpeech (requires ~1.5 GB disk space):
+``` 
+cd data
+mkdir librispeech-test-clean
+mkdir librispeech-test-other
+mkdir librispeech-temp
+cd librispeech-temp
+# test-clean.tar.gz is 346 MB, test-other.tar.gz is 328 MB
+wget http://www.openslr.org/resources/12/test-clean.tar.gz
+wget http://www.openslr.org/resources/12/test-other.tar.gz
+tar -xvf test-clean.tar.gz
+tar -xvf test-other.tar.gz  
+mv LibriSpeech ..
+cd  ..
+rm -Rf LibriSpeech
+rm test-clean.tar.gz
+rm test-other.tar.gz
+cd  ../src
+python format_librispeech_gold_transcriptions.py
+``` 
+
 
 ## License
 
