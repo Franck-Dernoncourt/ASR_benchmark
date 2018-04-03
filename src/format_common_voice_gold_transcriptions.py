@@ -9,7 +9,7 @@ import pandas as pd
 
 def main():
     data_folder = os.path.join('..','data','cv-valid-test')
-    df = pd.read_csv('cv-valid-test.csv')
+    df = pd.read_csv(os.path.join('..','data','cv-valid-test','cv-valid-test.csv'))
 
     for index, row in df.iterrows():
         speech_filepath = row['filename']
