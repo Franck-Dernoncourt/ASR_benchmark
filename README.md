@@ -4,7 +4,20 @@
 
 [![Build Status](https://travis-ci.org/Franck-Dernoncourt/ASR_benchmark.svg?branch=master)](https://travis-ci.org/Franck-Dernoncourt/ASR_benchmark)
 
-The Speech Recognition Benchmark is program that assesses and compares the performances of automated speech recognition (ASR) APIs. It runs on Mac OS X, Microsoft Windows and Ubuntu. It currently supports the following ASR APIs: Google, Google Cloud, Houndify, IBM Watson, Microsoft (a.k.a. Bing), Speechmatics and Wit.
+The Speech Recognition Benchmark is a program that assesses and compares the performances of automated speech recognition (ASR) APIs. It runs on Mac OS X, Microsoft Windows and Ubuntu. It currently supports the following ASR APIs: Google, Google Cloud, Houndify, IBM Watson, Microsoft (a.k.a. Bing), Speechmatics and Wit.
+
+
+ ## Table of Contents
+
+<!-- toc -->
+
+* [Installation](#installation)
+* [Usage](#usage)
+* [Benchmark results](#benchmark-results)
+* [License](#license)
+* [Citation](#citation)
+
+<!-- tocstop -->
 
 ## Installation
 
@@ -38,6 +51,7 @@ Important note: CV, LS-c, and LS-o are public corpora so it is very much possibl
 ## License
 
 Some code snippets were taken from external sources:
+- in [`src/asr_speechmatics.py`](src/asr_speechmatics.py), most of the code comes from https://github.com/speechmatics/speechmatics_python (author: [TomSpeechmatics](https://github.com/TomSpeechmatics), no license specified).
 - in [`src/transcribe.py`](src/transcribe.py), some code was adapted from https://github.com/Uberi/speech_recognition (made available under the 3-clause BSD license). For more licensing information. see the SpeechRecognition README.
 - in [`src/metrics.py`](src/metrics.py), the functions to compute the word error rate mostly comes from [http://progfruits.blogspot.com/2014/02/word-error-rate-wer-and-word.html](https://web.archive.org/web/20171215025927/http://progfruits.blogspot.com/2014/02/word-error-rate-wer-and-word.html) (author: [SpacePineapple](https://web.archive.org/web/20180401185957/https://www.blogger.com/profile/12691129381793481173), no license specified) and https://martin-thoma.com/word-error-rate-calculation (author: [Martin Thoma](https://github.com/MartinThoma), no license specified).
 
