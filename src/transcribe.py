@@ -9,7 +9,6 @@ import sys
 import asr_speechmatics
 import codecs
 
-
 def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
     '''
     Returns:
@@ -181,12 +180,23 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
         speechmatics_id = settings.get('credentials','speechmatics_id')
         speechmatics_token = settings.get('credentials','speechmatics_token')
         print('speech_filepath: {0}'.format(speech_filepath))
-        transcription,transcription_json = asr_speechmatics.transcribe_speechmatics(speechmatics_id,speechmatics_token,speech_filepath,speech_language)
+        transcription, transcription_json = asr_speechmatics.transcribe_speechmatics(speechmatics_id,speechmatics_token,speech_filepath,speech_language)
         try:
             print('Speechmatics  transcription is: {0}'.format(transcription))
         except:
             print('Speechmatics encountered some issue')
             asr_could_not_be_reached = True
+
+    elif asr_system == 'amazon':
+        try:
+            bot_name = settings.get('credentials','amazon_bot_name')
+            bot_alias = settings.get('credentials','amazon_bot_alias')
+            user_id = settings.get('credentials','amazon_user_id')
+            transcription,transcription_json = recognize_amazon(audio, bot_name, bot_alias, user_id,
+                     content_type="audio/l16; rate=16000; channels=1", access_key_id=settings.get('credentials','amazon_access_key_id'),
+                     secret_access_key=settings.get('credentials','amazon_secret_access_key'), region=settings.get('credentials','amazon_region'))
+        except sr.UnknownValueError:
+            print("Amazon not process the speech transcription request")
 
     else: raise ValueError("Invalid asr_system. asr_system = {0}".format(asr_system))
 
@@ -213,3 +223,48 @@ def transcribe(speech_filepath, asr_system, settings, save_transcription=True):
 
     transcription_skipped = False
     return transcription, transcription_skipped
+
+
+
+def recognize_amazon(audio_data, bot_name, bot_alias, user_id,
+                     content_type="audio/l16; rate=16000; channels=1", access_key_id=None, secret_access_key=None, region=None):
+    """
+    Performs speech recognition on ``audio_data`` (an ``AudioData`` instance).
+
+    If access_key_id or secret_access_key is not set it will go through the list in the link below
+    http://boto3.readthedocs.io/en/latest/guide/configuration.html#configuring-credentials
+
+    Author: Patrick Artounian (https://github.com/partounian)
+    Source: https://github.com/Uberi/speech_recognition/pull/331
+    """
+    assert isinstance(audio_data, sr.AudioData), "Data must be audio data"
+    assert isinstance(bot_name, str), "``bot_name`` must be a string"
+    assert isinstance(bot_alias, str), "``bot_alias`` must be a string"
+    assert isinstance(user_id, str), "``user_id`` must be a string"
+    assert isinstance(content_type, str), "``content_type`` must be a string"
+    assert access_key_id is None or isinstance(access_key_id, str), "``access_key_id`` must be a string"
+    assert secret_access_key is None or isinstance(secret_access_key, str), "``secret_access_key`` must be a string"
+    assert region is None or isinstance(region, str), "``region`` must be a string"
+
+    try:
+        import boto3
+    except ImportError:
+        raise sr.RequestError("missing boto3 module: ensure that boto3 is set up correctly.")
+
+    client = boto3.client('lex-runtime', aws_access_key_id=access_key_id,
+                          aws_secret_access_key=secret_access_key,
+                          region_name=region)
+
+    raw_data = audio_data.get_raw_data(
+        convert_rate=16000, convert_width=2
+    )
+
+    accept = "text/plain; charset=utf-8"
+    response = client.post_content(botName=bot_name, botAlias=bot_alias, userId=user_id,
+                                   contentType=content_type, accept=accept, inputStream=raw_data)
+
+    if not response["inputTranscript"]:
+        raise sr.UnknownValueError()
+
+    return response["inputTranscript"], response
+

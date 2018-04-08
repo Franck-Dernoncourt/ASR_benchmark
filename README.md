@@ -4,7 +4,7 @@
 
 [![Build Status](https://travis-ci.org/Franck-Dernoncourt/ASR_benchmark.svg?branch=master)](https://travis-ci.org/Franck-Dernoncourt/ASR_benchmark)
 
-The Speech Recognition Benchmark is a program that assesses and compares the performances of automated speech recognition (ASR) APIs. It runs on Mac OS X, Microsoft Windows and Ubuntu. It currently supports the following ASR APIs: [Google](https://www.chromium.org/developers/how-tos/api-keys), [Google Cloud](https://cloud.google.com/speech), [Houndify](https://www.houndify.com), [IBM Watson](https://www.ibm.com/watson/services/speech-to-text), [Microsoft (a.k.a. Bing)](https://azure.microsoft.com/en-us/services/cognitive-services/speech), [Speechmatics](https://www.speechmatics.com) and [Wit](https://wit.ai).
+The Speech Recognition Benchmark is a program that assesses and compares the performances of automated speech recognition (ASR) APIs. It runs on Mac OS X, Microsoft Windows and Ubuntu. It currently supports the following ASR APIs: [Amazon Lex](https://aws.amazon.com/lex), [Google](https://www.chromium.org/developers/how-tos/api-keys), [Google Cloud](https://cloud.google.com/speech), [Houndify](https://www.houndify.com), [IBM Watson](https://www.ibm.com/watson/services/speech-to-text), [Microsoft (a.k.a. Bing)](https://azure.microsoft.com/en-us/services/cognitive-services/speech), [Speechmatics](https://www.speechmatics.com) and [Wit](https://wit.ai).
 
 
  ## Table of Contents
@@ -24,7 +24,7 @@ The Speech Recognition Benchmark is a program that assesses and compares the per
 
 The Speech Recognition Benchmark requires Python 3, as well as a few Python packages that you may install running `pip install -r requirements.txt`
 
-The configuration file [`src/settings.ini`](src/settings.ini) contains all the parameters that you may wish to change. 
+The configuration file [`src/settings.ini`](src/settings.ini) contains all the parameters that you may wish to change.
 
 ## Usage
 
@@ -38,11 +38,11 @@ Important note: CV, LS-c, and LS-o are public corpora so it is very much possibl
 
 
 | ASR API      | Date |CV | F | IER | LS-c | LS-o |
-| :---         | :---: | :---: | :---: | :---: | :---: | :---: | 
+| :---         | :---: | :---: | :---: | :---: | :---: | :---: |
 | Human        |  |  | | | [5.8](https://arxiv.org/pdf/1512.02595v1.pdf#page=18) | [12.7](https://arxiv.org/pdf/1512.02595v1.pdf#page=18)
 | Google       | 2018-03-30 | 23.2 | 24.2| 16.6| 12.1| 28.8
 | Google Cloud | 2018-03-30 | 23.3 | 26.3| 18.3| 12.3| 27.3
-| IBM          | 2018-03-30 | 21.8 | 47.6| 24.0|  9.8| 25.3     
+| IBM          | 2018-03-30 | 21.8 | 47.6| 24.0|  9.8| 25.3
 | Microsoft    | 2018-03-30 | 29.1 | 28.1| 23.1| 18.8| 35.9
 | Speechmatics | 2018-03-30 | 21.2*| 31.9*| 21.4|  7.3| 19.4
 | Wit.ai       | 2018-03-30 | 35.6 | 54.2| 37.4| 19.2| 41.7
@@ -65,13 +65,13 @@ mv cv_corpus_v1/cv-valid-test cv-valid-test
 mv cv_corpus_v1/cv-valid-test.csv cv-valid-test
 rm -Rf  cv_corpus_v1
 rm cv_corpus_v1.tar.gz
-cd  ../src 
+cd  ../src
 # format_common_voice_gold_transcriptions.py requires the pandas package, which can be installed with: pip install pandas
 python format_common_voice_gold_transcriptions.py
-``` 
+```
 
 Bash script to format LibriSpeech (requires ~1.5 GB disk space):
-``` 
+```
 cd data
 mkdir librispeech-test-clean
 mkdir librispeech-test-other
@@ -81,7 +81,7 @@ cd librispeech-temp
 wget http://www.openslr.org/resources/12/test-clean.tar.gz
 wget http://www.openslr.org/resources/12/test-other.tar.gz
 tar -xvf test-clean.tar.gz
-tar -xvf test-other.tar.gz  
+tar -xvf test-other.tar.gz
 mv LibriSpeech ..
 cd  ..
 rm -Rf LibriSpeech
@@ -89,7 +89,7 @@ rm test-clean.tar.gz
 rm test-other.tar.gz
 cd  ../src
 python format_librispeech_gold_transcriptions.py
-``` 
+```
 
 
 ## License
@@ -97,6 +97,7 @@ python format_librispeech_gold_transcriptions.py
 Some code snippets were taken from external sources:
 - in [`src/asr_speechmatics.py`](src/asr_speechmatics.py), most of the code comes from https://github.com/speechmatics/speechmatics_python (author: [TomSpeechmatics](https://github.com/TomSpeechmatics), no license specified).
 - in [`src/metrics.py`](src/metrics.py), the functions to compute the word error rate mostly comes from [http://progfruits.blogspot.com/2014/02/word-error-rate-wer-and-word.html](https://web.archive.org/web/20171215025927/http://progfruits.blogspot.com/2014/02/word-error-rate-wer-and-word.html) (author: [SpacePineapple](https://web.archive.org/web/20180401185957/https://www.blogger.com/profile/12691129381793481173), no license specified) and https://martin-thoma.com/word-error-rate-calculation (author: [Martin Thoma](https://github.com/MartinThoma), no license specified).
+- in [`src/transcribe.py`](src/transcribe.py), the function `recognize_amazon` comes from https://github.com/Uberi/speech_recognition/pull/331 (author: [Patrick Artounian](https://github.com/partounian), no license specified).
 - in [`src/transcribe.py`](src/transcribe.py), some code was adapted from https://github.com/Uberi/speech_recognition (made available under the 3-clause BSD license). For more licensing information. see the SpeechRecognition README.
 
 The rest of the code is made available under the [CC BY-NC 4.0 license](https://creativecommons.org/licenses/by-nc/4.0/).
