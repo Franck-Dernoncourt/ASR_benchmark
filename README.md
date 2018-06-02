@@ -106,12 +106,10 @@ The rest of the code is made available under the [CC BY-NC 4.0 license](https://
 If you use this code in your publications, please cite:
 
 ```
-@misc{ASRbenchmark2018,
+@inproceedings{ASRbenchmark2018,
   author = {Franck Dernoncourt, Trung Bui, Walter Chang},
   title = {A Framework for Speech Recognition Benchmarking},
   year = {2018},
-  publisher = {GitHub},
-  journal = {GitHub repository},
-  howpublished = {\url{https://github.com/Franck-Dernoncourt/ASR_benchmark}},
+  booktitle={Interspeech}
 }
 ```
