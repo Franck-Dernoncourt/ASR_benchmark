@@ -103,7 +103,7 @@ The rest of the code is made available under the [CC BY-NC 4.0 license](https://
 
 ## Citation
 
-If you use this code in your publications, please cite [this paper](https://www.isca-speech.org/archive/Interspeech_2018/pdfs/3003.pdf):
+If you use this code in your publications, please cite [this paper](Interspeech%202018%20-%20A%20Framework%20for%20Speech%20Recognition%20Benchmarking.pdf) ([mirror](https://www.isca-speech.org/archive/Interspeech_2018/pdfs/3003.pdf)):
 
 ```
 @inproceedings{ASRbenchmark2018,
