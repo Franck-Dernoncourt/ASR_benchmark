@@ -56,7 +56,7 @@ For convenience, we provide two scripts to format the Common Voice and LibriSpee
 Bash script to format Common Voice (requires ~25 GB disk space):
 
 ```
-# cv_corpus_v1.tar.gz is 12 GB
+# cv_corpus_v1.tar.gz is 12 GB. Mirror for the S3 link below: https://archive.org/details/cv_corpus_v1.tar
 wget https://common-voice-data-download.s3.amazonaws.com/cv_corpus_v1.tar.gz
 tar -xvf cv_corpus_v1.tar.gz
 mkdir cv-valid-test
